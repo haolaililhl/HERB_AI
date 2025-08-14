@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本草纲目纲目中医智能诊疗系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',      // 深蓝色 - 主色调
+                        secondary: '#3b82f6',    // 蓝色 - 辅助色/按钮
+                        accent: '#dc2626',       // 红色 - 强调/状态
+                        neutral: '#f0f5f9',      // 浅灰 - 背景
+                        'neutral-dark': '#64748b' // 深灰 - 次要按钮
+                    },
+                    fontFamily: {
+                        sans: ['SimHei', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .tab-panel {
+                @apply hidden;
+            }
+            .tab-panel.active {
+                @apply block;
+            }
+            .fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            .tab-btn.active {
+                @apply bg-secondary text-white;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 标题区域 -->
+        <header class="text-center mb-8">
+            <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-primary">本草纲目中医智能诊疗系统</h1>
+            <p class="text-gray-600 mt-2">基于传统中医理论的智能诊疗助手</p>
+        </header>
+
+        <!-- 输入区域 -->
+        <section class="bg-white rounded-lg shadow-md p-6 mb-6 transform transition-all hover:shadow-lg">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                <i class="fa fa-user-md mr-2"></i>请输入您的身体状况
+            </h2>
+            <div class="mb-4">
+                <textarea 
+                    id="symptomInput" 
+                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+                    rows="4" 
+                    placeholder="请详细描述您的症状、不适感受等信息，例如：最近经常头痛，伴有咳嗽，喉咙干痒..."></textarea>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <button 
+                    id="analyzeBtn" 
+                    class="bg-secondary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-all flex items-center transform hover:scale-105"
+                >
+                    <i class="fa fa-stethoscope mr-2"></i>开始诊疗分析
+                </button>
+                <button 
+                    id="clearBtn" 
+                    class="bg-neutral-dark hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-md transition-all flex items-center transform hover:scale-105"
+                >
+                    <i class="fa fa-eraser mr-2"></i>清空内容
+                </button>
+            </div>
+        </section>
+
+        <!-- 状态区域 -->
+        <section class="mb-6">
+            <div id="status" class="text-accent font-medium py-3 px-4 bg-white rounded-md shadow-sm border-l-4 border-accent">
+                请输入症状并点击开始诊疗分析
+            </div>
+        </section>
+
+        <!-- 结果展示区域 -->
+        <section class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <!-- 标签页导航 -->
+            <div class="flex flex-wrap border-b border-gray-200 bg-gray-50">
+                <button class="tab-btn active px-5 py-3 text-left transition-all flex items-center" data-tab="disease">
+                    <i class="fa fa-heartbeat mr-2"></i>疾病识别
+                </button>
+                <button class="tab-btn px-5 py-3 text-left transition-all flex items-center" data-tab="herbs">
+                    <i class="fa fa-leaf mr-2"></i>药材检索
+                </button>
+                <button class="tab-btn px-5 py-3 text-left transition-all flex items-center" data-tab="prescription">
+                    <i class="fa fa-file-text-o mr-2"></i>初步药方
+                </button>
+                <button class="tab-btn px-5 py-3 text-left transition-all flex items-center" data-tab="review">
+                    <i class="fa fa-check-square-o mr-2"></i>药方审核
+                </button>
+                <button class="tab-btn px-5 py-3 text-left transition-all flex items-center" data-tab="final">
+                    <i class="fa fa-certificate mr-2"></i>最终药方
+                </button>
+            </div>
+
+            <!-- 标签页内容 -->
+            <div class="p-6">
+                <!-- 疾病识别 -->
+                <div id="disease" class="tab-panel active">
+                    <div class="min-h-[300px] p-4 border border-gray-200 rounded-md bg-gray-50 font-sans leading-relaxed">
+                        <pre id="diseaseResult" class="whitespace-pre-wrap text-gray-800">请输入症状并点击"开始诊疗分析"按钮获取结果</pre>
+                    </div>
+                </div>
+
+                <!-- 药材检索 -->
+                <div id="herbs" class="tab-panel">
+                    <div class="min-h-[300px] p-4 border border-gray-200 rounded-md bg-gray-50 font-sans leading-relaxed">
+                        <pre id="herbsResult" class="whitespace-pre-wrap text-gray-800">请先完成诊疗分析以获取药材检索结果</pre>
+                    </div>
+                </div>
+
+                <!-- 初步药方 -->
+                <div id="prescription" class="tab-panel">
+                    <div class="min-h-[300px] p-4 border border-gray-200 rounded-md bg-gray-50 font-sans leading-relaxed">
+                        <pre id="prescriptionResult" class="whitespace-pre-wrap text-gray-800">请先完成诊疗分析以获取初步药方</pre>
+                    </div>
+                </div>
+
+                <!-- 药方审核 -->
+                <div id="review" class="tab-panel">
+                    <div class="min-h-[300px] p-4 border border-gray-200 rounded-md bg-gray-50 font-sans leading-relaxed">
+                        <pre id="reviewResult" class="whitespace-pre-wrap text-gray-800">请先完成诊疗分析以获取药方审核结果</pre>
+                    </div>
+                </div>
+
+                <!-- 最终药方 -->
+                <div id="final" class="tab-panel">
+                    <div class="min-h-[300px] p-4 border border-gray-200 rounded-md bg-gray-50 font-sans leading-relaxed">
+                        <pre id="finalResult" class="whitespace-pre-wrap text-gray-800">请先完成诊疗分析以获取最终药方</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="text-center text-gray-500 text-sm py-4">
+            <p>免责声明：本系统仅提供参考信息，不能替代专业医师诊断。如有不适，请咨询专业医疗机构。</p>
+        </footer>
+    </div>
+
+    <script>
+        // 标签页切换功能
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // 移除所有活动状态
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active', 'fade-in'));
+                
+                // 添加当前活动状态
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active', 'fade-in');
+            });
+        });
+
+        // 状态更新函数
+        function updateStatus(message) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            // 添加短暂的高亮效果
+            statusElement.classList.add('bg-blue-50');
+            setTimeout(() => {
+                statusElement.classList.remove('bg-blue-50');
+            }, 500);
+        }
+
+        // 清空按钮功能
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('symptomInput').value = '';
+            document.getElementById('diseaseResult').textContent = '请输入症状并点击"开始诊疗分析"按钮获取结果';
+            document.getElementById('herbsResult').textContent = '请先完成诊疗分析以获取药材检索结果';
+            document.getElementById('prescriptionResult').textContent = '请先完成诊疗分析以获取初步药方';
+            document.getElementById('reviewResult').textContent = '请先完成诊疗分析以获取药方审核结果';
+            document.getElementById('finalResult').textContent = '请先完成诊疗分析以获取最终药方';
+            updateStatus('请输入症状并点击开始诊疗分析');
+        });
+
+        // AI请求函数 - 模拟Python中的OpenAI调用
+        async function callAI(prompt, systemPrompt = "你是一个经验丰富的中医。") {
+            // 实际应用中替换为真实API调用
+            const apiUrl = "http://34.13.73.248:3888/v1/chat/completions";
+            const apiKey = "sk-Oer4C1HqYxkYdgRWjOQGfY2EmBYwdwU618nl8Hhzj9bQW6c4";
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o-mini",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: prompt }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error("AI调用失败:", error);
+                // 模拟返回结果（调试用）
+                return "模拟AI响应：" + prompt.substring(0, 50) + "...";
+            }
+        }
+
+        // 分析按钮功能
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const symptom = document.getElementById('symptomInput').value.trim();
+            
+            if (!symptom) {
+                updateStatus('请先输入症状描述');
+                return;
+            }
+            
+            try {
+                // 清空之前的结果
+                document.getElementById('diseaseResult').textContent = '处理中...';
+                document.getElementById('herbsResult').textContent = '处理中...';
+                document.getElementById('prescriptionResult').textContent = '处理中...';
+                document.getElementById('reviewResult').textContent = '处理中...';
+                document.getElementById('finalResult').textContent = '处理中...';
+                
+                // 1. 疾病识别
+                updateStatus('正在进行疾病识别...');
+                const diseasePrompt = `
+                    我正在设计中药药方。请你帮我提取出下面需求中的疾病。
+                    我会参考本草纲目，因此你需要把疾病尽可能用古代医学典籍的方法表述出来。
+                    如果有多个可能的名字,返回多行
+                    不要标点
+                    最多返回五个
+                    每个疾病尽可能简短
+
+                    需求：${symptom}
+                `;
+                const diseaseResult = await callAI(diseasePrompt);
+                const possibleDiseases = diseaseResult.split('\n').filter(d => d.trim() !== '');
+                document.getElementById('diseaseResult').textContent = "识别出的可能疾病（古代名称）：\n" + 
+                    possibleDiseases.map((d, i) => `${i+1}. ${d}`).join('\n');
+                
+                // 2. 药材检索（模拟数据库查询）
+                updateStatus('正在检索相关药材...');
+                // 实际应用中应从数据库查询，这里使用模拟数据
+                const herbsResult = "参考 1：\n药物： 薄荷\n使用方法或疗效 1： 治头痛，通利咽喉\n\n参考 2：\n药物： 川贝母\n使用方法或疗效 1： 润肺止咳，治肺热咳嗽";
+                document.getElementById('herbsResult').textContent = herbsResult;
+                
+                // 3. 生成初步药方
+                updateStatus('正在生成初步药方...');
+                const prescriptionPrompt = `
+                    ${symptom}
+                    我从本草纲目搜集了一些相关的药物供你参考。请注意，我搜集回来的可能有噪声。请你仔细辨别。
+                    你开的方子，可以是一些已知的方剂。如果是新设计的，请包含每种药物的用量。
+                    
+                    ${herbsResult}
+                    
+                    请一步一步思考
+                `;
+                const prescriptionResult = await callAI(prescriptionPrompt);
+                document.getElementById('prescriptionResult').textContent = prescriptionResult;
+                
+                // 4. 药方审核
+                updateStatus('正在审核药方...');
+                const reviewPrompt = `
+                    你的任务是审核开出的药方是否合理。如不合理，请指出不合理的地方。
+                    
+                    诉求：${symptom}
+                    
+                    之前的药方：${prescriptionResult}
+                `;
+                const reviewResult = await callAI(reviewPrompt);
+                document.getElementById('reviewResult').textContent = reviewResult;
+                
+                // 5. 生成最终药方
+                updateStatus('正在生成最终药方...');
+                const finalPrompt = `${reviewResult}\n\n请再次开具药方`;
+                const finalResult = await callAI(finalPrompt);
+                document.getElementById('finalResult').textContent = finalResult;
+                
+                updateStatus('诊疗分析完成');
+                
+                // 切换到第一个标签页查看结果
+                document.querySelectorAll('.tab-btn')[0].click();
+                
+            } catch (error) {
+                updateStatus(`分析过程出错: ${error.message}`);
+                console.error('处理错误:', error);
+            }
+        });
+    </script>
+</body>
+</html>
